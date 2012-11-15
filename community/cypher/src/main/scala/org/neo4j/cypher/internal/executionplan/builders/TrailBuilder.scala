@@ -19,16 +19,20 @@
  */
 package org.neo4j.cypher.internal.executionplan.builders
 
-import org.neo4j.cypher.internal.commands.{VarLengthRelatedTo, RelatedTo, Pattern, Predicate}
+import org.neo4j.cypher.internal.commands._
 import org.neo4j.graphdb.Direction
 import org.neo4j.cypher.internal.commands.expressions.Identifier
 import org.neo4j.cypher.internal.pipes.matching._
 import org.neo4j.helpers.ThisShouldNotHappenError
 import annotation.tailrec
-import org.neo4j.cypher.internal.pipes.matching.VariableLengthStepTrail
-import org.neo4j.cypher.internal.pipes.matching.EndPoint
-import org.neo4j.cypher.internal.pipes.matching.SingleStepTrail
 import org.neo4j.cypher.internal.commands.expressions.Property
+import org.neo4j.cypher.internal.pipes.matching.NodeIdentifier
+import org.neo4j.cypher.internal.pipes.matching.MiniMapRelProperty
+import org.neo4j.cypher.internal.pipes.matching.VariableLengthStepTrail
+import org.neo4j.cypher.internal.pipes.matching.MiniMapNodeProperty
+import org.neo4j.cypher.internal.pipes.matching.EndPoint
+import org.neo4j.cypher.internal.pipes.matching.RelationshipIdentifier
+import org.neo4j.cypher.internal.pipes.matching.SingleStepTrail
 
 object TrailBuilder {
   def findLongestTrail(patterns: Seq[Pattern], boundPoints: Seq[String], predicates: Seq[Predicate] = Seq.empty) =
@@ -45,7 +49,10 @@ final class TrailBuilder(patterns: Seq[Pattern], boundPoints: Seq[String], predi
 
     def createFinder(elem: String): (Predicate => Boolean) = {
       def containsSingle(set: Set[String]) = set.size == 1 && set.head == elem
-      (pred: Predicate) => containsSingle(pred.symbolTableDependencies)
+      (pred: Predicate) =>
+        val a = containsSingle(pred.symbolTableDependencies)
+        val b = !pred.exists(_.isInstanceOf[PathExpression])
+        a && b
     }
 
     def transformToTrail(p: Pattern, done: Trail, patternsToDo: Seq[Pattern]): (Trail, Seq[Pattern]) = {

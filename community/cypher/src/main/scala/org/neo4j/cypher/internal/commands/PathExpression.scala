@@ -63,7 +63,7 @@ case class PathExpression(pathPattern: Seq[Pattern])
     matches.map(getPath)
   }
 
-  def filter(f: (Expression) => Boolean): Seq[Expression] = Seq()
+  def filter(f: (Expression) => Boolean): Seq[Expression] = if(f(this)) Seq(this) else Seq.empty
 
   def rewrite(f: (Expression) => Expression): Expression = f(PathExpression(pathPattern.map(_.rewrite(f))))
 

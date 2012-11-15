@@ -2285,4 +2285,13 @@ RETURN x0.name?
 
     assert(result.toList === List())
   }
+
+  @Test
+  def turned_off_pathexpressions_for_now() {
+    relate(refNode, createNode())
+
+    val result = parseAndExecute("START n=node(0) MATCH n-->pins WHERE not(pins-[:PINS_ASSET]->()) RETURN count(pins)")
+
+    assert(result.toList === List(Map("count(pins)"->1)))
+  }
 }
