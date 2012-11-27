@@ -25,24 +25,25 @@ import org.neo4j.cypher.CypherTypeException
 import org.neo4j.cypher.internal.symbols._
 import collection.JavaConverters._
 import org.neo4j.kernel.impl.core.NodeManager
-import org.neo4j.cypher.internal.symbols.AnyType
 import org.neo4j.graphdb.{PropertyContainer, Path, Relationship, Node}
+import org.neo4j.cypher.internal.helpers.IsCollection
 
 case class DeleteEntityAction(elementToDelete: Expression)
   extends UpdateAction {
   def exec(context: ExecutionContext, state: QueryState) = {
     elementToDelete(context) match {
-      case n: Node => delete(n, state)
-      case r: Relationship => delete(r, state)
-      case null =>
-      case p:Path => p.iterator().asScala.foreach( pc => delete(pc, state))
-      case x => throw new CypherTypeException("Expression `" + elementToDelete.toString() + "` yielded `" + x.toString + "`. Don't know how to delete that.")
+      case n: Node            => delete(n, state)
+      case r: Relationship    => delete(r, state)
+      case null               =>
+      case p: Path            => p.iterator().asScala.foreach(pc => delete(pc, state))
+      case IsCollection(coll) => coll.foreach( pc => delete(pc, state) )
+      case x                  => throw new CypherTypeException("Expression `" + elementToDelete.toString() + "` yielded `" + x.toString + "`. Don't know how to delete that.")
     }
 
     Stream(context)
   }
 
-  private def delete(x: PropertyContainer, state: QueryState) {
+  private def delete(x: Any, state: QueryState) {
     val nodeManager: NodeManager = state.graphDatabaseAPI.getNodeManager
 
     x match {
@@ -50,11 +51,17 @@ case class DeleteEntityAction(elementToDelete: Expression)
         state.deletedNodes.increase()
         state.query.nodeOps().delete(n)
 
-      case r: Relationship if (!nodeManager.isDeleted(r))=>
+      case r: Relationship if (!nodeManager.isDeleted(r)) =>
         state.deletedRelationships.increase()
         state.query.relationshipOps().delete(r)
 
-      case _ => // Entity is already deleted. No need to do anything
+      case _: PropertyContainer => // Entity is already deleted. No need to do anything
+
+      case null => // NOP
+
+      case value =>
+        val message = "Expression `%s` yielded a collection containing `%s`. Don't know how to delete that.".format(elementToDelete.toString(), value)
+        throw new CypherTypeException(message)
 
     }
   }
