@@ -22,4 +22,5 @@ package org.neo4j.kernel.api;
 public interface TransactionContext
 {
     StatementContext newStatementContext();
+    void commit();
 }

@@ -19,8 +19,6 @@
  */
 package org.neo4j.kernel.impl.api;
 
-import java.util.List;
-
 import org.neo4j.kernel.api.StatementContext;
 import org.neo4j.kernel.api.TransactionContext;
 import org.neo4j.kernel.impl.core.NodeManager;
@@ -50,9 +48,14 @@ public class TransactionContextImpl implements TransactionContext
         TemporaryLabelAsPropertyContext statementContext =
                 new TemporaryLabelAsPropertyContext( propertyIndexManager, persistenceManager );
 
-        TransactionStateAwareStatementContext stateContext = new TransactionStateAwareStatementContext(
-                statementContext, state );
+        return new TransactionStateAwareStatementContext( statementContext, state );
+    }
 
-        return new LockingStatementContext( stateContext, state, nodeManager );
+    @Override
+    public void commit()
+    {
+        // tx.success
+        // tx.finish
+        // commit cache
     }
 }
