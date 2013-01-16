@@ -109,6 +109,8 @@ public class WritableTransactionState implements TransactionState
         protected boolean deleted;
         protected ArrayMap<Integer,PropertyData> propertyAddMap;
         protected ArrayMap<Integer,PropertyData> propertyRemoveMap;
+        protected Set<Long> addedLabels;
+        protected Set<Long> removedLabels;
 
         CowEntityElement( long id )
         {
@@ -195,6 +197,20 @@ public class WritableTransactionState implements TransactionState
         public String toString()
         {
             return "Node[" + id + "]";
+        }
+
+        public Set<Long> getAddedLabels( boolean create )
+        {
+            if ( addedLabels == null && create )
+                addedLabels = new HashSet<Long>();
+            return addedLabels;
+        }
+
+        public Set<Long> getRemovedLabels( boolean create )
+        {
+            if ( removedLabels == null && create )
+                removedLabels = new HashSet<Long>();
+            return removedLabels;
         }
     }
 
@@ -790,5 +806,22 @@ public class WritableTransactionState implements TransactionState
     public TxIdGenerator getTxIdGenerator()
     {
         return txIdGenerator;
+    }
+
+    @Override
+    public Set<Long> getOrCreateAddedLabels( long nodeId )
+    {
+        return getPrimitiveElement( true ).nodeElement( nodeId, true ).getAddedLabels( true );
+    }
+
+    @Override
+    public Set<Long> getRemovedLabels( long nodeId )
+    {
+        if ( primitiveElement == null )
+            return null;
+        CowNodeElement node = primitiveElement.nodeElement( nodeId, false );
+        if ( node == null )
+            return null;
+        return node.getRemovedLabels( false );
     }
 }

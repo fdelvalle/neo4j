@@ -20,6 +20,7 @@
 package org.neo4j.kernel.impl.core;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotInTransactionException;
@@ -212,6 +213,18 @@ public class NoTransactionState implements TransactionState
     
     @Override
     public TxIdGenerator getTxIdGenerator()
+    {
+        return null;
+    }
+
+    @Override
+    public Set<Long> getOrCreateAddedLabels( long nodeId )
+    {
+        throw new NotInTransactionException();
+    }
+
+    @Override
+    public Set<Long> getRemovedLabels( long nodeId )
     {
         return null;
     }

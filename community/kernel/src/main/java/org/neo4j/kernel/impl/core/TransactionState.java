@@ -20,6 +20,7 @@
 package org.neo4j.kernel.impl.core;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -112,4 +113,8 @@ public interface TransactionState
     public TxIdGenerator getTxIdGenerator();
     
     public static final TransactionState NO_STATE = new NoTransactionState();
+
+    Set<Long> getOrCreateAddedLabels( long nodeId );
+
+    Set<Long> getRemovedLabels( long nodeId );
 }

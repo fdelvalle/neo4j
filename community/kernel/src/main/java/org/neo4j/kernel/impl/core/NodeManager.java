@@ -1123,7 +1123,7 @@ public class NodeManager
         relCache.updateSize( rel, newSize );
     }
     
-    TransactionState getTransactionState()
+    public TransactionState getTransactionState()
     {
         return transactionManager.getTransactionState();
     }
