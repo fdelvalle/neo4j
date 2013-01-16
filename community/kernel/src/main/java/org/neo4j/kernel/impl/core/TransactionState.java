@@ -114,6 +114,8 @@ public interface TransactionState
     
     public static final TransactionState NO_STATE = new NoTransactionState();
 
+    Set<Long> getAddedLabels( long nodeId );
+
     Set<Long> getOrCreateAddedLabels( long nodeId );
 
     Set<Long> getRemovedLabels( long nodeId );

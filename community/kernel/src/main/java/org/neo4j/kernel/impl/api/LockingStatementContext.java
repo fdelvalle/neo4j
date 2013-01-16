@@ -19,40 +19,46 @@
  */
 package org.neo4j.kernel.impl.api;
 
-import java.util.List;
-
+import org.neo4j.kernel.api.LabelNotFoundException;
 import org.neo4j.kernel.api.StatementContext;
-import org.neo4j.kernel.api.TransactionContext;
 import org.neo4j.kernel.impl.core.NodeManager;
-import org.neo4j.kernel.impl.core.PropertyIndexManager;
 import org.neo4j.kernel.impl.core.TransactionState;
-import org.neo4j.kernel.impl.persistence.PersistenceManager;
 
-public class TransactionContextImpl implements TransactionContext
+public class LockingStatementContext implements StatementContext
 {
+    private final StatementContext actual;
     private final TransactionState state;
-    private final PropertyIndexManager propertyIndexManager;
-    private final PersistenceManager persistenceManager;
     private final NodeManager nodeManager;
 
-    public TransactionContextImpl( TransactionState state, PropertyIndexManager propertyIndexManager,
-                                   PersistenceManager persistenceManager, NodeManager nodeManager )
+    public LockingStatementContext( StatementContext actual, TransactionState state, NodeManager nodeManager )
     {
+        this.actual = actual;
         this.state = state;
-        this.propertyIndexManager = propertyIndexManager;
-        this.persistenceManager = persistenceManager;
         this.nodeManager = nodeManager;
     }
 
     @Override
-    public StatementContext newStatementContext()
+    public long getOrCreateLabelId( String label )
     {
-        TemporaryLabelAsPropertyContext statementContext =
-                new TemporaryLabelAsPropertyContext( propertyIndexManager, persistenceManager );
+        return actual.getOrCreateLabelId( label );
+    }
 
-        TransactionStateAwareStatementContext stateContext = new TransactionStateAwareStatementContext(
-                statementContext, state );
+    @Override
+    public long getLabelId( String label ) throws LabelNotFoundException
+    {
+        return actual.getLabelId( label );
+    }
 
-        return new LockingStatementContext( stateContext, state, nodeManager );
+    @Override
+    public void addLabelToNode( long labelId, long nodeId )
+    {
+        state.acquireWriteLock( nodeManager.newNodeProxyById( nodeId ) );
+        actual.addLabelToNode( labelId, nodeId );
+    }
+
+    @Override
+    public boolean isLabelSetOnNode( long labelId, long nodeId )
+    {
+        return actual.isLabelSetOnNode( labelId, nodeId );
     }
 }

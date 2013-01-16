@@ -809,6 +809,17 @@ public class WritableTransactionState implements TransactionState
     }
 
     @Override
+    public Set<Long> getAddedLabels( long nodeId )
+    {
+        if ( primitiveElement == null )
+            return null;
+        CowNodeElement node = primitiveElement.nodeElement( nodeId, false );
+        if ( node == null )
+            return null;
+        return node.getAddedLabels( false );
+    }
+
+    @Override
     public Set<Long> getOrCreateAddedLabels( long nodeId )
     {
         return getPrimitiveElement( true ).nodeElement( nodeId, true ).getAddedLabels( true );

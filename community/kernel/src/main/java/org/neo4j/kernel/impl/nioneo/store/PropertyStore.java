@@ -580,8 +580,8 @@ public class PropertyStore extends AbstractStore implements Store, RecordStore<P
         }
         else if ( value instanceof LabelAsProperty )
         {
-            long keyAndType = keyId | (((long)PropertyType.LABEL.intValue()) << 24);
-            block.setValueBlocks( new long[] {keyAndType, ((LabelAsProperty) value).getNodeId()} );
+            long keyAndType = keyId | (((long) PropertyType.LABEL.intValue()) << 24);
+            block.setValueBlocks( new long[]{keyAndType, ((LabelAsProperty) value).getNodeId()} );
         }
         else
         {

@@ -26,4 +26,6 @@ public interface StatementContext
     long getLabelId( String label ) throws LabelNotFoundException;
     
     void addLabelToNode( long labelId, long nodeId );
+
+    boolean isLabelSetOnNode( long labelId, long nodeId );
 }

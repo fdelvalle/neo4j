@@ -314,6 +314,12 @@ public enum PropertyType
         {
             return new LabelAsPropertyData( propertyId, block.getKeyIndexId(), getValue( block, null ) );
         }
+
+        @Override
+        public int calculateNumberOfBlocksUsed( long firstBlock )
+        {
+            return 2;
+        }
     };
 
     private final int type;
@@ -383,6 +389,8 @@ public enum PropertyType
             return SHORT_STRING;
         case 12:
             return SHORT_ARRAY;
+        case 13:
+            return LABEL;
         default: if (nullOnIllegal) return null;
             throw new InvalidRecordException( "Unknown property type for type "
                                               + type );

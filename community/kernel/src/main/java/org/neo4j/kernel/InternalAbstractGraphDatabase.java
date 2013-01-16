@@ -1308,6 +1308,10 @@ public abstract class InternalAbstractGraphDatabase
             {
                 return (T) propertyIndexManager;
             }
+            else if ( PersistenceManager.class.isAssignableFrom( type ) )
+            {
+                return (T) persistenceManager;
+            }
             else
             {
                 // Try with kernel extensions

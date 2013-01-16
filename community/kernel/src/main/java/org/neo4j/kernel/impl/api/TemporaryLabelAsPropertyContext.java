@@ -19,35 +19,30 @@
  */
 package org.neo4j.kernel.impl.api;
 
-import java.util.Set;
-
 import org.neo4j.kernel.api.LabelNotFoundException;
 import org.neo4j.kernel.api.StatementContext;
 import org.neo4j.kernel.impl.core.KeyNotFoundException;
-import org.neo4j.kernel.impl.core.NodeManager;
 import org.neo4j.kernel.impl.core.PropertyIndex;
 import org.neo4j.kernel.impl.core.PropertyIndexManager;
-import org.neo4j.kernel.impl.core.TransactionState;
+import org.neo4j.kernel.impl.nioneo.store.PropertyData;
 import org.neo4j.kernel.impl.persistence.PersistenceManager;
+import org.neo4j.kernel.impl.util.ArrayMap;
 
-public class StatementContextImpl implements StatementContext
+// TODO This is the hack where we temporarily store the labels in the property store
+public class TemporaryLabelAsPropertyContext implements StatementContext
 {
     private static final String LABEL_PREFIX = "___label___";
-    
-    private final TransactionState state;
+
     private final PropertyIndexManager propertyIndexManager;
     private final PersistenceManager persistenceManager;
-    private final NodeManager nodeManager;
 
-    public StatementContextImpl( TransactionState state, PropertyIndexManager propertyIndexManager,
-            PersistenceManager persistenceManager, NodeManager nodeManager )
+    public TemporaryLabelAsPropertyContext( PropertyIndexManager propertyIndexManager,
+                                            PersistenceManager persistenceManager )
     {
-        this.state = state;
         this.propertyIndexManager = propertyIndexManager;
         this.persistenceManager = persistenceManager;
-        this.nodeManager = nodeManager;
     }
-    
+
     @Override
     public long getOrCreateLabelId( String label )
     {
@@ -70,22 +65,18 @@ public class StatementContextImpl implements StatementContext
     @Override
     public void addLabelToNode( long labelId, long nodeId )
     {
-        state.acquireWriteLock( nodeManager.newNodeProxyById( nodeId ) );
-        Set<Long> addedLabels = null, removedLabels = null;
-        if ( state.hasChanges() )
-        {
-            addedLabels = state.getOrCreateAddedLabels( nodeId );
-            removedLabels = state.getRemovedLabels( nodeId );
-        }
-        
-        if ( !addedLabels.add( labelId ) )
-            return; // Already added
-        if ( removedLabels != null )
-            removedLabels.remove( labelId );
-        
-        // TODO This is the hack where we temporarily store the labels in the property store
         PropertyIndex propertyIndex = propertyIndexManager.getKeyByIdOrNull( (int) labelId );
         persistenceManager.nodeAddProperty( nodeId, propertyIndex, new LabelAsProperty( nodeId ) );
+    }
+
+    @Override
+    public boolean isLabelSetOnNode( long labelId, long nodeId )
+    {
+        ArrayMap<Integer, PropertyData> propertyMap = persistenceManager.loadNodeProperties( nodeId, true );
+        if ( propertyMap == null )
+            return false;
+
+        return propertyMap.get( (int) labelId ) != null;
     }
 
     private String internalLabelName( String label )

@@ -218,6 +218,12 @@ public class NoTransactionState implements TransactionState
     }
 
     @Override
+    public Set<Long> getAddedLabels( long nodeId )
+    {
+        return null;
+    }
+
+    @Override
     public Set<Long> getOrCreateAddedLabels( long nodeId )
     {
         throw new NotInTransactionException();

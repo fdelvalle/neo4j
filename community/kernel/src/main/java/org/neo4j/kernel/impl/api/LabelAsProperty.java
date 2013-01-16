@@ -32,4 +32,10 @@ public class LabelAsProperty
     {
         return nodeId;
     }
+
+    @Override
+    public String toString()
+    {
+        return "" + nodeId;
+    }
 }
