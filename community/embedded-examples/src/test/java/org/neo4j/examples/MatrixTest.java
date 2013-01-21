@@ -18,7 +18,8 @@
  */
 package org.neo4j.examples;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.neo4j.visualization.asciidoc.AsciidocHelper.createOutputSnippet;
 
 import org.junit.BeforeClass;
@@ -63,12 +64,12 @@ public class MatrixTest
 
     private void check( String friends, String hackers )
     {
-        assertTrue( friends.contains( "friends found: 4" ) );
-        assertTrue( friends.contains( "Trinity" ) );
-        assertTrue( friends.contains( "Morpheus" ) );
-        assertTrue( friends.contains( "Cypher" ) );
-        assertTrue( friends.contains( "Agent Smith" ) );
-        assertTrue( hackers.contains( "hackers found: 1" ) );
-        assertTrue( hackers.contains( "The Architect" ) );
+        assertThat( friends, containsString( "friends found: 4" ) );
+        assertThat( friends, containsString( "Trinity" ) );
+        assertThat( friends, containsString( "Morpheus" ) );
+        assertThat( friends, containsString( "Cypher" ) );
+        assertThat( friends, containsString( "Agent Smith" ) );
+        assertThat( hackers, containsString( "hackers found: 1" ) );
+        assertThat( hackers, containsString( "The Architect" ) );
     }
 }

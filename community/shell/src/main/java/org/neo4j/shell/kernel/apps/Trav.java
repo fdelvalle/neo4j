@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.Traverser;
 import org.neo4j.graphdb.traversal.BranchOrderingPolicy;
 import org.neo4j.graphdb.traversal.Evaluation;
 import org.neo4j.graphdb.traversal.Evaluator;
@@ -53,7 +52,7 @@ import org.neo4j.shell.Session;
 import org.neo4j.shell.ShellException;
 
 /**
- * Traverses the graph using {@link Traverser}.
+ * Traverses the graph using {@link org.neo4j.graphdb.traversal.Traverser}.
  */
 @Service.Implementation( App.class )
 public class Trav extends ReadOnlyGraphDatabaseApp

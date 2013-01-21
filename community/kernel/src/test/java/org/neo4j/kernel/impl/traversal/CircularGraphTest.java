@@ -26,17 +26,16 @@ import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
+import org.neo4j.graphdb.traversal.Evaluation;
+import org.neo4j.graphdb.traversal.Evaluator;
+import org.neo4j.graphdb.traversal.Traverser;
+import org.neo4j.kernel.Traversal;
 
 public class CircularGraphTest extends AbstractTestBase
 {
@@ -57,32 +56,27 @@ public class CircularGraphTest extends AbstractTestBase
         tx.finish();
 
         final RelationshipType type = DynamicRelationshipType.withName( "TO" );
-        Traverser t = node( "1" ).traverse( Order.DEPTH_FIRST, new StopEvaluator()
+        Traverser t = Traversal.traversal().depthFirst().evaluator( new Evaluator()
         {
-            public boolean isStopNode( TraversalPosition position )
+            @Override
+            public Evaluation evaluate( Path path )
             {
-                Relationship last = position.lastRelationshipTraversed();
-                if ( last != null && last.isType( type ) )
+                Relationship relationship = path.lastRelationship();
+                if ( relationship == null )
                 {
-                    Node node = position.currentNode();
-                    long currentTime = (Long) node.getProperty( "timestamp" );
-                    return currentTime >= timestamp;
+                    return Evaluation.EXCLUDE_AND_CONTINUE;
                 }
-                return false;
-            }
-        }, new ReturnableEvaluator()
-        {
-            public boolean isReturnableNode( TraversalPosition position )
-            {
-                Relationship last = position.lastRelationshipTraversed();
-                if ( last != null && last.isType( type ) )
+
+                if ( !relationship.isType( type ) )
                 {
-                    return true;
+                    return Evaluation.EXCLUDE_AND_CONTINUE;
                 }
-                return false;
+
+                long currentTime = (Long) path.endNode().getProperty( "timestamp" );
+                return Evaluation.ofContinues( currentTime < timestamp );
             }
-        }, type, Direction.OUTGOING );
-        Iterator<Node> nodes = t.iterator();
+        } ).traverse( node( "1" ) );
+        Iterator<Node> nodes = t.nodes().iterator();
         assertEquals( "2", nodes.next().getProperty( "name" ) );
         assertEquals( "3", nodes.next().getProperty( "name" ) );
         assertFalse( nodes.hasNext() );

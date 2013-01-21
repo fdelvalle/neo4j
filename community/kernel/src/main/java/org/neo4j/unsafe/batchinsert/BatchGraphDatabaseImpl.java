@@ -34,11 +34,7 @@ import org.neo4j.graphdb.NotInTransactionException;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.graphdb.event.KernelEventHandler;
 import org.neo4j.graphdb.event.TransactionEventHandler;
 import org.neo4j.graphdb.index.IndexManager;
@@ -368,64 +364,6 @@ class BatchGraphDatabaseImpl implements GraphDatabaseService
         public boolean hasRelationship( RelationshipType type, Direction dir )
         {
             return newRelIterator( dir, new RelationshipType[] { type } ).hasNext();
-        }
-
-        /* Tentative expansion API
-        public Expansion<Relationship> expandAll()
-        {
-            return Traversal.expanderForAllTypes().expand( this );
-        }
-
-        public Expansion<Relationship> expand( RelationshipType type )
-        {
-            return expand( type, Direction.BOTH );
-        }
-
-        public Expansion<Relationship> expand( RelationshipType type,
-                Direction direction )
-        {
-            return Traversal.expanderForTypes( type, direction ).expand(
-                    this );
-        }
-
-        public Expansion<Relationship> expand( Direction direction )
-        {
-            return Traversal.expanderForAllTypes( direction ).expand(
-                    this );
-        }
-
-        public Expansion<Relationship> expand( RelationshipExpander expander )
-        {
-            return Traversal.expander( expander ).expand( this );
-        }
-        */
-
-        @Override
-        public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            RelationshipType relationshipType, Direction direction )
-        {
-            throw new UnsupportedOperationException( "Batch inserter mode" );
-        }
-
-        @Override
-        public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            RelationshipType firstRelationshipType, Direction firstDirection,
-            RelationshipType secondRelationshipType, Direction secondDirection )
-        {
-            throw new UnsupportedOperationException( "Batch inserter mode" );
-        }
-
-        @Override
-        public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            Object... relationshipTypesAndDirections )
-        {
-            throw new UnsupportedOperationException( "Batch inserter mode" );
         }
 
         @Override

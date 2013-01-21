@@ -21,7 +21,6 @@ package org.neo4j.cypher
 
 import org.junit.Test
 import java.lang.Iterable
-import org.neo4j.graphdb.Traverser.Order
 import org.neo4j.graphdb._
 import org.scalatest.Spec
 import scala.collection.JavaConverters._
@@ -135,12 +134,6 @@ class PathImplTest extends Spec {
     def getSingleRelationship(`type` : RelationshipType, dir: Direction): Relationship = null
 
     def createRelationshipTo(otherNode: Node, `type` : RelationshipType): Relationship = null
-
-    def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipType: RelationshipType, direction: Direction): Traverser = null
-
-    def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, firstRelationshipType: RelationshipType, firstDirection: Direction, secondRelationshipType: RelationshipType, secondDirection: Direction): Traverser = null
-
-    def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipTypesAndDirections: AnyRef*): Traverser = null
 
     def getGraphDatabase: GraphDatabaseService = null
 

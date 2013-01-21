@@ -29,7 +29,6 @@ import org.neo4j.graphdb._
 import java.util.{Iterator => JIterator}
 import java.lang.{Iterable => JIterable}
 import org.junit.{Test, Before}
-import org.neo4j.graphdb.Traverser.Order
 import org.scalatest.Assertions
 
 class LazyTest extends ExecutionEngineHelper with Assertions {
@@ -214,12 +213,6 @@ class MonitoredNode(inner: Node, monitor: () => Unit) extends Node {
   def getSingleRelationship(`type`: RelationshipType, dir: Direction): Relationship = null
 
   def createRelationshipTo(otherNode: Node, `type`: RelationshipType): Relationship = null
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipType: RelationshipType, direction: Direction): Traverser = null
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, firstRelationshipType: RelationshipType, firstDirection: Direction, secondRelationshipType: RelationshipType, secondDirection: Direction): Traverser = null
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipTypesAndDirections: AnyRef*): Traverser = null
 
   def getGraphDatabase: GraphDatabaseService = null
 

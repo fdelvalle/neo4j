@@ -25,10 +25,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
 
 public class LockableNode implements Node
 {
@@ -172,31 +168,6 @@ public class LockableNode implements Node
     }
 
     public boolean hasRelationship( RelationshipType type, Direction dir )
-    {
-        throw lockableNodeException();
-    }
-
-    public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            RelationshipType relationshipType, Direction direction )
-    {
-        throw lockableNodeException();
-    }
-
-    public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            RelationshipType firstRelationshipType, Direction firstDirection,
-            RelationshipType secondRelationshipType, Direction secondDirection )
-    {
-        throw lockableNodeException();
-    }
-
-    public Traverser traverse( Order traversalOrder,
-            StopEvaluator stopEvaluator,
-            ReturnableEvaluator returnableEvaluator,
-            Object... relationshipTypesAndDirections )
     {
         throw lockableNodeException();
     }

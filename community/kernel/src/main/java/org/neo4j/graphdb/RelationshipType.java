@@ -22,7 +22,7 @@ package org.neo4j.graphdb;
 /**
  * A relationship type is mandatory on all relationships and is used to navigate
  * the node space. RelationshipType is in particular a key part of the
- * {@link Traverser traverser framework} but it's also used in various
+ * traversal framework but it's also used in various
  * {@link Node#getRelationships() relationship operations} on Node.
  * <p>
  * Relationship types are declared by the client and can be handled either

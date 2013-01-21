@@ -27,11 +27,8 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.helpers.Service;
+import org.neo4j.kernel.Traversal;
 import org.neo4j.shell.App;
 import org.neo4j.shell.AppCommandParser;
 import org.neo4j.shell.Continuation;
@@ -139,10 +136,7 @@ public class Rmrel extends GraphDatabaseApp
         }
 
         Node refNode = getServer().getDb().getReferenceNode();
-        Traverser traverser = node.traverse( Order.DEPTH_FIRST,
-            StopEvaluator.END_OF_GRAPH, ReturnableEvaluator.ALL,
-            filterList.toArray() );
-        for ( Node testNode : traverser )
+        for ( Node testNode : Traversal.traversal().traverse( node ).nodes() )
         {
             if ( refNode.equals( testNode ) )
             {

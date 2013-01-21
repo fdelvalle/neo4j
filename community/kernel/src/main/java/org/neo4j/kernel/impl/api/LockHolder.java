@@ -31,9 +31,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Traverser;
 import org.neo4j.kernel.impl.transaction.LockManager;
 import org.neo4j.kernel.impl.transaction.LockType;
 
@@ -212,28 +209,6 @@ public class LockHolder
 
         @Override
         public Relationship createRelationshipTo( Node otherNode, RelationshipType type )
-        {
-            throw unsupportedOperation();
-        }
-
-        @Override
-        public Traverser traverse( Traverser.Order traversalOrder, StopEvaluator stopEvaluator, ReturnableEvaluator
-                returnableEvaluator, RelationshipType relationshipType, Direction direction )
-        {
-            throw unsupportedOperation();
-        }
-
-        @Override
-        public Traverser traverse( Traverser.Order traversalOrder, StopEvaluator stopEvaluator, ReturnableEvaluator
-                returnableEvaluator, RelationshipType firstRelationshipType, Direction firstDirection,
-                                   RelationshipType secondRelationshipType, Direction secondDirection )
-        {
-            throw unsupportedOperation();
-        }
-
-        @Override
-        public Traverser traverse( Traverser.Order traversalOrder, StopEvaluator stopEvaluator, ReturnableEvaluator
-                returnableEvaluator, Object... relationshipTypesAndDirections )
         {
             throw unsupportedOperation();
         }

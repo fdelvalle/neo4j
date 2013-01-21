@@ -19,9 +19,15 @@
  */
 package matching;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.neo4j.graphdb.DynamicRelationshipType.withName;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,20 +36,18 @@ import org.junit.Test;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.Evaluation;
+import org.neo4j.graphdb.traversal.Evaluator;
+import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphmatching.PatternMatch;
 import org.neo4j.graphmatching.PatternMatcher;
 import org.neo4j.graphmatching.PatternNode;
 import org.neo4j.helpers.collection.IteratorWrapper;
-
-import static org.junit.Assert.*;
-import static org.neo4j.graphdb.DynamicRelationshipType.*;
+import org.neo4j.kernel.Traversal;
 
 public class TestMatchingOfCircularPattern
 {
@@ -215,28 +219,20 @@ public class TestMatchingOfCircularPattern
 
     private static Iterable<Node> traverse( final Node startNode )
     {
-        return startNode.traverse( Order.BREADTH_FIRST, stopAtDepth( 2 ),
-                new ReturnableEvaluator()
+        return Traversal.traversal().breadthFirst()
+                .relationships( withName( "FOLLOWS" ), Direction.OUTGOING )
+                .relationships( withName( "CREATED" ), Direction.OUTGOING )
+                .evaluator( Evaluators.toDepth( 2 ) )
+                .evaluator( new Evaluator()
                 {
-                    public boolean isReturnableNode( TraversalPosition pos )
+                    @Override
+                    public Evaluation evaluate( Path path )
                     {
-                        Node node = pos.currentNode();
-                        return isMessage( node )
-                               && isVisibleTo( node, startNode );
+                        Node node = path.endNode();
+                        return Evaluation.ofIncludes( isMessage( node )
+                                && isVisibleTo( node, startNode ) );
                     }
-                }, withName( "FOLLOWS" ), Direction.OUTGOING,
-                withName( "CREATED" ), Direction.OUTGOING );
-    }
-
-    public static StopEvaluator stopAtDepth( final int depth )
-    {
-        return new StopEvaluator()
-        {
-            public boolean isStopNode( TraversalPosition currentPos )
-            {
-                return currentPos.depth() >= depth;
-            }
-        };
+                } ).traverse( startNode ).nodes();
     }
 
     static boolean isMessage( Node node )

@@ -23,7 +23,6 @@ import org.junit.Test
 import org.scalatest.Assertions
 import org.neo4j.test.ImpermanentGraphDatabase
 import java.lang.Iterable
-import org.neo4j.graphdb.Traverser.Order
 import org.neo4j.graphdb._
 import org.neo4j.cypher.internal.pipes.{QueryState}
 import collection.JavaConverters._
@@ -133,12 +132,6 @@ class PausingNode(n: Node, afterGetRelationship: Node => Unit) extends Node {
   def createRelationshipTo(otherNode: Node, `type`: RelationshipType): Relationship = {
     n.createRelationshipTo(otherNode, `type`)
   }
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipType: RelationshipType, direction: Direction): Traverser = ???
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, firstRelationshipType: RelationshipType, firstDirection: Direction, secondRelationshipType: RelationshipType, secondDirection: Direction): Traverser = ???
-
-  def traverse(traversalOrder: Order, stopEvaluator: StopEvaluator, returnableEvaluator: ReturnableEvaluator, relationshipTypesAndDirections: AnyRef*): Traverser = ???
 
   def getGraphDatabase: GraphDatabaseService = ???
 

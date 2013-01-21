@@ -26,15 +26,10 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.kernel.ThreadToStatementContextBridge;
 import org.neo4j.kernel.api.LabelNotFoundException;
 import org.neo4j.kernel.api.StatementContext;
 import org.neo4j.kernel.impl.transaction.LockType;
-import org.neo4j.kernel.impl.traversal.OldTraverserWrapper;
 
 public class NodeProxy implements Node
 {
@@ -210,63 +205,6 @@ public class NodeProxy implements Node
         RelationshipType type )
     {
         return nodeLookup.lookup(nodeId, LockType.WRITE).createRelationshipTo( nodeLookup.getNodeManager(), this, otherNode, type );
-    }
-
-    /* Tentative expansion API
-    public Expansion<Relationship> expandAll()
-    {
-        return nodeLookup.lookup(nodeId).expandAll();
-    }
-
-    public Expansion<Relationship> expand( RelationshipType type )
-    {
-        return nodeLookup.lookup(nodeId).expand( type );
-    }
-
-    public Expansion<Relationship> expand( RelationshipType type,
-            Direction direction )
-    {
-        return nodeLookup.lookup(nodeId).expand( type, direction );
-    }
-
-    public Expansion<Relationship> expand( Direction direction )
-    {
-        return nodeLookup.lookup(nodeId).expand( direction );
-    }
-
-    public Expansion<Relationship> expand( RelationshipExpander expander )
-    {
-        return nodeLookup.lookup(nodeId).expand( expander );
-    }
-    */
-
-    public Traverser traverse( Order traversalOrder,
-        StopEvaluator stopEvaluator, ReturnableEvaluator returnableEvaluator,
-        RelationshipType relationshipType, Direction direction )
-    {
-        return OldTraverserWrapper.traverse( this,
-                                             traversalOrder, stopEvaluator,
-                                             returnableEvaluator, relationshipType, direction );
-    }
-
-    public Traverser traverse( Order traversalOrder,
-        StopEvaluator stopEvaluator, ReturnableEvaluator returnableEvaluator,
-        RelationshipType firstRelationshipType, Direction firstDirection,
-        RelationshipType secondRelationshipType, Direction secondDirection )
-    {
-        return OldTraverserWrapper.traverse( this,
-                                             traversalOrder, stopEvaluator,
-                                             returnableEvaluator, firstRelationshipType, firstDirection,
-                                             secondRelationshipType, secondDirection );
-    }
-
-    public Traverser traverse( Order traversalOrder,
-        StopEvaluator stopEvaluator, ReturnableEvaluator returnableEvaluator,
-        Object... relationshipTypesAndDirections )
-    {
-        return OldTraverserWrapper.traverse( this,
-                                             traversalOrder, stopEvaluator,
-                                             returnableEvaluator, relationshipTypesAndDirections );
     }
 
     @Override

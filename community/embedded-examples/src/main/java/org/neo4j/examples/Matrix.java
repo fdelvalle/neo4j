@@ -19,18 +19,18 @@
 package org.neo4j.examples;
 
 import java.io.File;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.Evaluators;
+import org.neo4j.graphdb.traversal.Traverser;
+import org.neo4j.kernel.Traversal;
 
 public class Matrix
 {
@@ -140,12 +140,12 @@ public class Matrix
         int numberOfFriends = 0;
         String output = neoNode.getProperty( "name" ) + "'s friends:\n";
         Traverser friendsTraverser = getFriends( neoNode );
-        for ( Node friendNode : friendsTraverser )
+        for ( Path friendPath : friendsTraverser )
         {
             output += "At depth " +
-                        friendsTraverser.currentPosition().depth() + 
+                        friendPath.length() +
                         " => " + 
-                        friendNode.getProperty( "name" ) + "\n";
+                        friendPath.endNode().getProperty( "name" ) + "\n";
             numberOfFriends++;
         }
         output += "Number of friends found: " + numberOfFriends + "\n";
@@ -156,10 +156,9 @@ public class Matrix
     // START SNIPPET: get-friends
     private static Traverser getFriends( final Node person )
     {
-        return person.traverse( Order.BREADTH_FIRST,
-                StopEvaluator.END_OF_GRAPH,
-                ReturnableEvaluator.ALL_BUT_START_NODE, RelTypes.KNOWS,
-                Direction.OUTGOING );
+        return Traversal.traversal().breadthFirst()
+                .evaluator( Evaluators.excludeStartPosition() )
+                .relationships( RelTypes.KNOWS, Direction.OUTGOING ).traverse( person );
     }
     // END SNIPPET: get-friends
 
@@ -169,36 +168,27 @@ public class Matrix
         String output = "Hackers:\n";
         int numberOfHackers = 0;
         Traverser traverser = findHackers( getNeoNode() );
-        for ( Node hackerNode : traverser )
+        for ( Path hackerPath : traverser )
         {
             output += "At depth " +
-                        traverser.currentPosition().depth() +
+                        hackerPath.length() +
                         " => " + 
-                        hackerNode.getProperty( "name" ) + "\n";
+                        hackerPath.endNode().getProperty( "name" ) + "\n";
             numberOfHackers++;
         }
         output += "Number of hackers found: " + numberOfHackers + "\n";
         // END SNIPPET: find--hackers-usage
         return output;
-        // assertEquals( 1, numberOfHackers );
     }
 
     // START SNIPPET: find-hackers
     private static Traverser findHackers( final Node startNode )
     {
-        return startNode.traverse( Order.BREADTH_FIRST,
-                StopEvaluator.END_OF_GRAPH, new ReturnableEvaluator()
-        {
-            @Override
-            public boolean isReturnableNode(
-                    final TraversalPosition currentPos )
-            {
-                return !currentPos.isStartNode()
-                && currentPos.lastRelationshipTraversed()
-                .isType( RelTypes.CODED_BY );
-            }
-        }, RelTypes.CODED_BY, Direction.OUTGOING, RelTypes.KNOWS,
-        Direction.OUTGOING );
+        return Traversal.traversal().breadthFirst()
+                .evaluator( Evaluators.includeWhereLastRelationshipTypeIs( RelTypes.CODED_BY ) )
+                .relationships( RelTypes.CODED_BY, Direction.OUTGOING )
+                .relationships( RelTypes.KNOWS, Direction.OUTGOING )
+                .traverse( startNode );
     }
     // END SNIPPET: find-hackers
 

@@ -21,19 +21,17 @@ package org.neo4j.visualization.graphviz;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.kernel.Traversal;
 import org.neo4j.walk.Walker;
 
 public class TestNewGraphvizWriter
@@ -63,6 +61,7 @@ public class TestNewGraphvizWriter
 		Transaction tx = neo.beginTx();
 		try
 		{
+            //GIVEN
 			final Node emil = neo.createNode();
 			emil.setProperty( "name", "Emil Eifrém" );
 			emil.setProperty( "age", 30 );
@@ -76,20 +75,20 @@ public class TestNewGraphvizWriter
 			final Relationship emilKNOWStobias = emil.createRelationshipTo(
 			    tobias, type.KNOWS );
 			emilKNOWStobias.setProperty( "since", "2003-08-17" );
-			final Relationship johanKNOWSemil = johan.createRelationshipTo(
-			    emil, type.KNOWS );
-			final Relationship tobiasKNOWSjohan = tobias.createRelationshipTo(
-			    johan, type.KNOWS );
-			final Relationship tobiasWORKS_FORemil = tobias
-			    .createRelationshipTo( emil, type.WORKS_FOR );
+
+			johan.createRelationshipTo( emil, type.KNOWS );
+			tobias.createRelationshipTo( johan, type.KNOWS );
+			tobias.createRelationshipTo( emil, type.WORKS_FOR );
 			OutputStream out = new ByteArrayOutputStream();
 			GraphvizWriter writer = new GraphvizWriter();
-            writer.emit( out, Walker.crosscut( emil.traverse( Order.DEPTH_FIRST,
-                    StopEvaluator.END_OF_GRAPH, ReturnableEvaluator.ALL, type.KNOWS,
-                    Direction.BOTH, type.WORKS_FOR, Direction.BOTH ), type.KNOWS, type.WORKS_FOR ) );
+
+            Iterable<Node> nodes = Traversal.traversal().depthFirst().relationships( type.KNOWS ).relationships( type
+                    .WORKS_FOR ).traverse( emil ).nodes();
+            writer.emit( out, Walker.crosscut( nodes, type.KNOWS, type.WORKS_FOR ) );
 			tx.success();
-			System.out.println( out.toString() );
-		}
+
+            String resultString = out.toString();
+        }
 		finally
 		{
 			tx.finish();
