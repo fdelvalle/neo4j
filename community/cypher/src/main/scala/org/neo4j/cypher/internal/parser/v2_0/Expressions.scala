@@ -23,7 +23,7 @@ import org.neo4j.cypher.internal.commands._
 import expressions._
 import org.neo4j.cypher.SyntaxException
 
-trait Expressions extends Base with ParserPattern with Predicates with StringLiteral {
+trait Expressions extends Base with ParserPattern with Predicates with StringLiteral with LabelLiteral {
   def expression: Parser[Expression] = term ~ rep("+" ~ term | "-" ~ term) ^^ {
     case head ~ rest =>
       var result = head
@@ -63,6 +63,7 @@ trait Expressions extends Base with ParserPattern with Predicates with StringLit
       | nullableProperty
       | property
       | stringLit
+      | labelLitSeq
       | labelLit
       | numberLiteral
       | collectionLiteral
@@ -139,7 +140,6 @@ trait Expressions extends Base with ParserPattern with Predicates with StringLit
   case class Function(acceptsTheseManyArguments: Int => Boolean, create: List[Expression] => Expression)
 
   val functions = Map(
-    "strlabel" -> func(1, args => StrLabelFunction(args.head)),
     "labels" -> func(1, args => LabelsFunction(args.head)),
     "type" -> func(1, args => RelationshipTypeFunction(args.head)),
     "id" -> func(1, args => IdFunction(args.head)),
@@ -214,6 +214,8 @@ trait Expressions extends Base with ParserPattern with Predicates with StringLit
     case Seq(x:ShortestPath) => ShortestPathExpression(x)
     case patterns => PathExpression(patterns)
   }
+
+  // LABELS
 
   private def translate(abstractPattern: AbstractPattern): Maybe[Pattern] = matchTranslator(abstractPattern) match {
       case Yes(Seq(np)) if np.isInstanceOf[NamedPath] => No(Seq("Can't assign to an identifier in a pattern expression"))

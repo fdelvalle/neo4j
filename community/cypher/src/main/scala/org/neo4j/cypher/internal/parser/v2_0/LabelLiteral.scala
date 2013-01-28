@@ -20,19 +20,14 @@
 package org.neo4j.cypher.internal.parser.v2_0
 
 import org.neo4j.cypher.internal.commands.expressions.{Expression, Literal}
-import org.neo4j.cypher.internal.commands.values.LabelValue
+import org.neo4j.cypher.internal.commands.values.{LabelName, LabelValue}
 
-trait LabelParsing {
-  self: Base =>
+trait LabelLiteral extends Base {
+  def labelLit: Parser[Literal] = ":" ~> identity ^^ (x => Literal(LabelName(x)))
 
-  def optLabelSeq = opt(labelSeq)
+  def labelLitSeq: Parser[Literal] = rep1(labelLit) ^^ (x => Literal(x map (_.v)))
 
-  def labelSeq = longLabelSeq | shortLabelSeq
+  def labelList: Parser[Expression] = labelLitSeq | ignoreCase("label") ~> expression
 
-  def longLabelSeq: Parser[Expression]  = ignoreCase("LABEL") ~> labelLitSeq
-  def shortLabelSeq: Parser[Literal]    = labelLitSeq
-
-  def labelLitSeq = rep1(labelLit) ^^ { (x: List[Literal]) =>
-    Literal(x map { _.v.asInstanceOf[LabelValue] } )
-  }
+  def expression: Parser[Expression]
 }
