@@ -2471,4 +2471,21 @@ RETURN x0.name?
     // THEN
     assert(result.toList === List(Map("n" -> b)))
   }
+
+  @Test def should_filter_nodes_by_label_given_in_match() {
+    // GIVEN
+    val a = createLabeledNode("bar")
+    val b = createLabeledNode("foo", "bar")
+    val c = createNode()
+
+    relate(a, b, "likes")
+    relate(a, c, "likes")
+
+    // WHEN
+    val result = parseAndExecute("""START a=node(1), b=node(2, 3) MATCH a:bar -[:likes]-> b:foo RETURN b""")
+
+    // THEN
+    assert(result.toList === List(Map("b" -> b)))
+
+  }
 }

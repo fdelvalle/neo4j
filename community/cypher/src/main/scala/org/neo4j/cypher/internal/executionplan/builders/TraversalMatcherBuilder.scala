@@ -59,7 +59,8 @@ class TraversalMatcherBuilder(graph: GraphDatabaseService) extends PlanBuilder {
 
   private def markPredicatesAsSolved(in: ExecutionPlanInProgress, trail: Trail): Seq[QueryToken[Predicate]] = {
     val originalWhere = in.query.where
-    val predicates = trail.predicates.toList
+    // filter out HasLabel for now to make the catch all work - SP
+    val predicates = trail.predicates.toList.filter(! _.isInstanceOf[HasLabel])
     val (solvedPreds, old) = originalWhere.partition(pred => predicates.contains(pred.token))
 
     old ++ solvedPreds.map(_.solve)
