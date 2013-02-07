@@ -52,8 +52,18 @@ class ExecutionPlanBuilder(graph: GraphDatabaseService) extends PatternGraphBuil
   }
 
   def buildPipes(in: AbstractQuery): (Pipe, Boolean) = in match {
-    case q:Query => buildQuery(q)
-    case q:IndexOperation => buildIndexQuery(q)
+    case q: Query          => buildQuery(q)
+    case q: IndexOperation => buildIndexQuery(q)
+    case q: Union          => buildUnionQuery(q)
+  }
+
+  def buildUnionQuery(union: Union): (Pipe, Boolean) = {
+    val combined = union.queries.map(buildQuery)
+
+    val pipes = combined.map(_._1)
+    val updating = combined.map(_._2).reduce(_ || _)
+
+    (new UnionPipe(pipes), updating)
   }
 
   def buildIndexQuery(op: IndexOperation): (Pipe, Boolean) = (new IndexOperationPipe(op), true)
