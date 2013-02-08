@@ -22,13 +22,8 @@ package org.neo4j.cypher.internal.pipes
 import org.neo4j.cypher.internal.symbols.SymbolTable
 import org.neo4j.cypher.internal.ExecutionContext
 
-class UnionPipe(in:Seq[Pipe]) extends Pipe {
-  def createResults(state: QueryState): Iterator[ExecutionContext] = {
-
-    println(executionPlanDescription())
-
-    new UnionIterator(in, state)
-  }
+class UnionPipe(in: Seq[Pipe]) extends Pipe {
+  def createResults(state: QueryState): Iterator[ExecutionContext] = new UnionIterator(in, state)
 
   def executionPlanDescription(): String = in.map(_.executionPlanDescription()).mkString("\n  UNION\n")
 
