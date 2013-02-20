@@ -24,6 +24,7 @@ import org.neo4j.cypher.internal.symbols.{NumberType, SymbolTable}
 import collection.mutable.ListBuffer
 import org.neo4j.cypher.internal.commands.expressions.Expression
 import org.neo4j.cypher.internal.ExecutionContext
+import org.neo4j.cypher.internal.data.SimpleVal
 
 /*
  * TopPipe is used when a query does a ORDER BY ... LIMIT query. Instead of ordering the whole result set and then
@@ -78,7 +79,9 @@ class TopPipe(source: Pipe, sortDescription: List[SortItem], countExpression: Ex
 
   def executionPlanDescription =
     source.executionPlanDescription
-      .andThen(this, "Top", "orderBy" -> sortDescription.map(_.toString), "limit" -> countExpression)
+      .andThen(this, "Top",
+        "orderBy" -> SimpleVal.fromIterable(sortDescription),
+        "limit" -> SimpleVal.fromStr(countExpression))
 
   def symbols = source.symbols
 

@@ -20,8 +20,8 @@
 package org.neo4j.cypher.internal.pipes
 
 import matching.{PatternGraph, MatchingContext}
-import java.lang.String
 import org.neo4j.cypher.internal.commands.Predicate
+import org.neo4j.cypher.internal.data.SimpleVal
 
 class MatchPipe(source: Pipe, predicates: Seq[Predicate], patternGraph: PatternGraph) extends Pipe {
   val matchingContext = new MatchingContext(source.symbols, predicates, patternGraph)
@@ -31,5 +31,6 @@ class MatchPipe(source: Pipe, predicates: Seq[Predicate], patternGraph: PatternG
      ctx => matchingContext.getMatches(ctx, state)
   }
 
-  override def executionPlanDescription = source.executionPlanDescription.andThen(this, "PatternMatch", "g" -> patternGraph)
+  override def executionPlanDescription =
+    source.executionPlanDescription.andThen(this, "PatternMatch", "g" -> SimpleVal.fromStr(patternGraph))
 }

@@ -33,6 +33,7 @@ trait ExecutionResult extends Iterator[Map[String, Any]] {
   def dumpToString(): String
   def queryStatistics(): QueryStatistics
   def executionPlanDescription(): JPlanDescription
+  def materialize(): Int = size
 }
 
 

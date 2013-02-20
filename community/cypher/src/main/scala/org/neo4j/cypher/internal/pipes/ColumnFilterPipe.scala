@@ -24,11 +24,11 @@ import org.neo4j.cypher.internal.commands.expressions.Identifier
 import org.neo4j.cypher.internal.commands.expressions.Identifier.isNamed
 import org.neo4j.cypher.internal.commands.expressions.CachedExpression
 import org.neo4j.cypher.internal.commands.ReturnItem
-import org.neo4j.cypher.PlanDescription
+import org.neo4j.cypher.internal.data.SimpleVal
 
 class ColumnFilterPipe(source: Pipe, val returnItems: Seq[ReturnItem])
   extends PipeWithSource(source) {
-  val returnItemNames = returnItems.map(_.name)
+  val returnItemNames: Seq[String] = returnItems.map(_.name)
   val symbols = new SymbolTable(identifiers2.toMap)
 
   private lazy val identifiers2: Seq[(String, CypherType)] = returnItems.
@@ -50,7 +50,9 @@ class ColumnFilterPipe(source: Pipe, val returnItems: Seq[ReturnItem])
 
   override def executionPlanDescription =
     source.executionPlanDescription
-      .andThen(this, "ColumnFilter", "symKeys" -> source.symbols.keys, "returnItemNames" -> returnItemNames)
+      .andThen(this, "ColumnFilter",
+        "symKeys" -> SimpleVal.fromIterable(source.symbols.keys),
+        "returnItemNames" -> SimpleVal.fromIterable(returnItemNames))
 
   def dependencies = Seq()
 

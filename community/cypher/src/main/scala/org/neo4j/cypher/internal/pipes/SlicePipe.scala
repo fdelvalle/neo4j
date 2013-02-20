@@ -22,6 +22,7 @@ package org.neo4j.cypher.internal.pipes
 import org.neo4j.cypher.internal.commands.expressions.Expression
 import org.neo4j.helpers.ThisShouldNotHappenError
 import org.neo4j.cypher.internal.ExecutionContext
+import org.neo4j.cypher.internal.data.SimpleVal
 
 class SlicePipe(source:Pipe, skip:Option[Expression], limit:Option[Expression]) extends Pipe {
 
@@ -54,13 +55,13 @@ class SlicePipe(source:Pipe, skip:Option[Expression], limit:Option[Expression]) 
 
   override def executionPlanDescription = {
 
-    val args = (skip, limit) match {
+    val args: Seq[(String, Expression)] = (skip, limit) match {
       case (None, Some(l)) => Seq("limit" -> l)
       case (Some(s), None) => Seq("skip" -> s)
       case (Some(s), Some(l)) => Seq("skip" -> s, "limit" -> l)
       case (None, None)=>throw new ThisShouldNotHappenError("Andres Taylor", "A slice pipe that doesn't slice should never exist.")
     }
-    source.executionPlanDescription.andThen(this, "Slice", args: _*)
+    source.executionPlanDescription.andThen(this, "Slice", args.toMap.mapValues(SimpleVal.fromStr).toSeq: _*)
   }
 }
 

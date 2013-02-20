@@ -21,7 +21,7 @@ package org.neo4j.cypher.internal.pipes
 
 import org.neo4j.cypher.internal.mutation._
 import org.neo4j.graphdb.{GraphDatabaseService, NotInTransactionException}
-import org.neo4j.cypher.{PlanDescription, SyntaxException, ParameterWrongTypeException, InternalException}
+import org.neo4j.cypher.{SyntaxException, ParameterWrongTypeException, InternalException}
 import org.neo4j.cypher.internal.mutation.CreateUniqueAction
 import scala.Some
 import org.neo4j.cypher.internal.mutation.CreateNode
@@ -29,6 +29,7 @@ import collection.Map
 import org.neo4j.cypher.internal.commands.expressions.{Identifier, Expression}
 import org.neo4j.cypher.internal.symbols.SymbolTable
 import org.neo4j.cypher.internal.ExecutionContext
+import org.neo4j.cypher.internal.data.SimpleVal
 
 class ExecuteUpdateCommandsPipe(source: Pipe, db: GraphDatabaseService, commands: Seq[UpdateAction])
   extends PipeWithSource(source) {
@@ -88,7 +89,7 @@ class ExecuteUpdateCommandsPipe(source: Pipe, db: GraphDatabaseService, commands
   }
 
   override def executionPlanDescription =
-    source.executionPlanDescription.andThen(this, "UpdateGraph", "commands" -> commands.map(_.toString))
+    source.executionPlanDescription.andThen(this, "UpdateGraph", "commands" -> SimpleVal.fromIterable(commands))
 
   def symbols = source.symbols.add(commands.flatMap(_.identifiers).toMap)
 

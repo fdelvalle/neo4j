@@ -20,7 +20,12 @@ public interface PlanDescription
     public String getName();
 
     /**
-     * @return a map containing arbitrary arguments that describe this execution step in more detail
+     * Retrieve argument map for the associated execution step
+     *
+     * Valid arguments are all Java primitive values, Strings, Arrays of those, and Maps from Strings to
+     * valid arguments.  Results are guaranteed to be trees (i.e. there are no cyclic dependencies among values)
+     *
+     * @return a map containing arguments that describe this execution step in more detail
      */
     public Map<String, Object> getArguments();
 
