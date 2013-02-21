@@ -119,8 +119,6 @@ class PipeExecutionResult(result: Iterator[Map[String, Any]],
       }
     }
 
-
-
     writer.println("%s ms".format(timeTaken))
   }
 

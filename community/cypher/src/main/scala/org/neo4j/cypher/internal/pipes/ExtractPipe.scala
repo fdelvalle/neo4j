@@ -22,6 +22,14 @@ package org.neo4j.cypher.internal.pipes
 import org.neo4j.cypher.internal.symbols._
 import org.neo4j.cypher.internal.commands.expressions.Expression
 import org.neo4j.cypher.internal.data.SimpleVal
+import org.neo4j.cypher.internal.ExecutionContext
+
+object ExtractPipe {
+  def apply(source: Pipe, expressions: Map[String, Expression]): ExtractPipe = source match {
+    case p: ExtractPipe => new ExtractPipe(p.source, p.expressions ++ expressions)
+    case _              => new ExtractPipe(source, expressions)
+  }
+}
 
 class ExtractPipe(source: Pipe, val expressions: Map[String, Expression]) extends PipeWithSource(source) {
   val symbols: SymbolTable = {
@@ -32,9 +40,10 @@ class ExtractPipe(source: Pipe, val expressions: Map[String, Expression]) extend
     source.symbols.add(newIdentifiers)
   }
 
-  protected def internalCreateResults(state: QueryState) = source.createResults(state).map(subgraph => {
-    expressions.foreach {
-      case (name, expression) =>
+  protected def internalCreateResults(input: Iterator[ExecutionContext], state: QueryState) = input.map(
+    subgraph => {
+      expressions.foreach {
+        case (name, expression) =>
         subgraph += name -> expression(subgraph)(state)
     }
     subgraph

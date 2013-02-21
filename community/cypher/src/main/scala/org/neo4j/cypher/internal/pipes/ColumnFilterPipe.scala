@@ -25,6 +25,7 @@ import org.neo4j.cypher.internal.commands.expressions.Identifier.isNamed
 import org.neo4j.cypher.internal.commands.expressions.CachedExpression
 import org.neo4j.cypher.internal.commands.ReturnItem
 import org.neo4j.cypher.internal.data.SimpleVal
+import org.neo4j.cypher.internal.ExecutionContext
 
 class ColumnFilterPipe(source: Pipe, val returnItems: Seq[ReturnItem])
   extends PipeWithSource(source) {
@@ -34,8 +35,8 @@ class ColumnFilterPipe(source: Pipe, val returnItems: Seq[ReturnItem])
   private lazy val identifiers2: Seq[(String, CypherType)] = returnItems.
     map( ri => ri.name->ri.expression.getType(source.symbols))
 
-  protected def internalCreateResults(state: QueryState) = {
-    source.createResults(state).map(ctx => {
+  protected def internalCreateResults(input: Iterator[ExecutionContext], state: QueryState) = {
+    input.map(ctx => {
       val newMap = MutableMaps.create(ctx.size)
 
       returnItems.foreach {

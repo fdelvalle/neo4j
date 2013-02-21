@@ -20,16 +20,15 @@
 package org.neo4j.cypher.internal.pipes
 
 import org.neo4j.cypher.internal.commands.NamedPath
-import org.neo4j.cypher.internal.symbols.PathType
 import org.neo4j.cypher.internal.data.SimpleVal
+import org.neo4j.cypher.internal.symbols.{SymbolTable, PathType}
+import org.neo4j.cypher.internal.ExecutionContext
 
-class NamedPathPipe(source: Pipe, path: NamedPath) extends Pipe {
-  protected def internalCreateResults(state: QueryState) = {
-    source.createResults(state).map(ctx => {
-      ctx.put(path.pathName, path.getPath(ctx))
-      ctx
-    })
-  }
+class NamedPathPipe(source: Pipe, path: NamedPath) extends PipeWithSource(source) {
+  protected def internalCreateResults(input: Iterator[ExecutionContext], state: QueryState) = input.map(ctx => {
+    ctx.put(path.pathName, path.getPath(ctx))
+    ctx
+  })
 
   val symbols = source.symbols.add(path.pathName, PathType())
 
@@ -39,4 +38,5 @@ class NamedPathPipe(source: Pipe, path: NamedPath) extends Pipe {
 
     source.executionPlanDescription.andThen(this, "ExtractPath",  "name" -> name, "patterns" -> pats)
   }
+  def throwIfSymbolsMissing(symbols: SymbolTable) { }
 }

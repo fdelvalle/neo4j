@@ -31,15 +31,13 @@ import org.neo4j.cypher.internal.data.SimpleVal
  * returning the matching top results, we only keep the top results in heap, which allows us to release memory earlier
  */
 class TopPipe(source: Pipe, sortDescription: List[SortItem], countExpression: Expression) extends PipeWithSource(source) with ExecutionContextComparer {
-  protected def internalCreateResults(state: QueryState): Iterator[ExecutionContext] = {
+  protected def internalCreateResults(input:Iterator[ExecutionContext], state: QueryState): Iterator[ExecutionContext] = {
     implicit val s = state
     var result = new ListBuffer[ExecutionContext]()
     var last: Option[ExecutionContext] = None
     val largerThanLast = (ctx: ExecutionContext) => last.forall(s => compareBy(s, ctx, sortDescription))
     var size = 0
     var sorted = false
-
-    val input = source.createResults(state)
 
     if (input.isEmpty)
       Iterator()

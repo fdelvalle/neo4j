@@ -76,7 +76,7 @@ class ProfilerAcceptanceTest extends ExecutionEngineHelper with Assertions {
       descr
     else {
       assert(names.head === descr.getName)
-      descr.cd(names.tail:_*)
+      descr.cd(names.tail: _*)
     }
   }
 }

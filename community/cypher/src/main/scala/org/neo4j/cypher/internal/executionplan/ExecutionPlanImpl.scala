@@ -152,15 +152,17 @@ class ExecutionPlanImpl(inputQuery: Query, graph: GraphDatabaseService) extends 
     else
       NullDecorator
 
+
     try {
       val gdsContext = new GDSBackedQueryContext(graph)
 
       val state = new QueryState(graph, gdsContext, params, decorator)
       val results = pipe.createResults(state)
+      val descriptor = () => decorator.decorate(pipe.executionPlanDescription)
 
       val closingIterator = new ClosingIterator[ExecutionContext](results, state.query, tx)
 
-      (state, closingIterator, () => decorator.decorate(pipe.executionPlanDescription))
+      (state, closingIterator, descriptor)
     } catch {
       case e: Throwable =>
         tx.failure()

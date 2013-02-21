@@ -97,9 +97,6 @@ class PlanDescription(val pipe: Pipe,
     }
   }
 
-
-  lazy val asJava: JPlanDescription = new PlanDescriptionConverter
-
   /**
    * Java-side PlanDescription implementation
    */
@@ -161,6 +158,15 @@ class PlanDescription(val pipe: Pipe,
     private def getNamedLongStat(name: String) =
      argsMap.v.get(name).getOrElse(throw new ProfilerStatisticsNotReadyException()).asJava.asInstanceOf[Long]
   }
+
+  def find(name: String): Option[PlanDescription] =
+    if (this.name == name)
+      Some(this)
+    else {
+      children.head.find(name)
+    }
+
+  lazy val asJava: JPlanDescription = new PlanDescriptionConverter
 }
 
 object PlanDescription {

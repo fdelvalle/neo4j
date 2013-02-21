@@ -23,11 +23,12 @@ import matching.{Trail, TraversalMatcher}
 import org.neo4j.cypher.internal.symbols.SymbolTable
 import collection.JavaConverters._
 import org.neo4j.cypher.internal.data.SimpleVal
+import org.neo4j.cypher.internal.ExecutionContext
 
 class TraversalMatchPipe(source: Pipe, matcher: TraversalMatcher, trail: Trail) extends PipeWithSource(source) {
 
-  protected def internalCreateResults(state: QueryState) = {
-    source.createResults(state).flatMap {
+  protected def internalCreateResults(input: Iterator[ExecutionContext], state: QueryState) = {
+    input.flatMap {
 
       case ctx =>
         val paths = matcher.findMatchingPaths(state, ctx)

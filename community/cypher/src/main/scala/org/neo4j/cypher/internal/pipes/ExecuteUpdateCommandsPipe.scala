@@ -36,12 +36,8 @@ class ExecuteUpdateCommandsPipe(source: Pipe, db: GraphDatabaseService, commands
 
   assertNothingIsCreatedWhenItShouldNot()
 
-  protected def internalCreateResults(state: QueryState) = {
-    val input = source.createResults(state)
-    val result = input.flatMap {
-      case ctx => executeMutationCommands(ctx, state, commands.size == 1)
-    }
-    result
+  protected def internalCreateResults(input: Iterator[ExecutionContext],state: QueryState) = input.flatMap {
+    case ctx => executeMutationCommands(ctx, state, commands.size == 1)
   }
 
   private def executeMutationCommands(ctx: ExecutionContext,
