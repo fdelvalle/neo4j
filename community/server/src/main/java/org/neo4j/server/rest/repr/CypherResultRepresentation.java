@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.neo4j.cypher.javacompat.ExecutionResult;
+import org.neo4j.cypher.javacompat.PlanDescription;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -34,13 +35,42 @@ public class CypherResultRepresentation extends MappingRepresentation
 {
     private final ListRepresentation resultRepresentation;
     private final ListRepresentation columns;
+    private final boolean includePlan;
+    private final MappingRepresentation plan;
 
 
-    public CypherResultRepresentation( ExecutionResult result )
+    public CypherResultRepresentation( ExecutionResult result, boolean includePlan )
     {
         super( RepresentationType.STRING );
         resultRepresentation = createResultRepresentation(result);
         columns = ListRepresentation.string( result.columns() );
+        this.includePlan = includePlan;
+        plan = includePlan ? createPlanRepresentation( result.executionPlanDescription() ) : null;
+    }
+
+    private MappingRepresentation createPlanRepresentation( final PlanDescription planDescription )
+    {
+        return new MappingRepresentation( "plan" ) {
+            @Override
+            protected void serialize( MappingSerializer mappingSerializer )
+            {
+                mappingSerializer.putString( "name", planDescription.getName() );
+                // TODO args
+                // TODO stats
+                mappingSerializer.putList( "children",
+                    new ListRepresentation( "children",
+                            new IterableWrapper<Representation, PlanDescription>(planDescription.getChildren()) {
+
+                                @Override
+                                protected Representation underlyingObjectToObject( PlanDescription object )
+                                {
+                                    return createPlanRepresentation( object );
+                                }
+                            }
+                    )
+                );
+            }
+        };
     }
 
     @Override
@@ -48,6 +78,8 @@ public class CypherResultRepresentation extends MappingRepresentation
     {
         serializer.putList( "columns", columns );
         serializer.putList( "data", resultRepresentation );
+        if (includePlan)
+            serializer.putMapping( "plan", plan );
     }
 
     private ListRepresentation createResultRepresentation(ExecutionResult executionResult) {
