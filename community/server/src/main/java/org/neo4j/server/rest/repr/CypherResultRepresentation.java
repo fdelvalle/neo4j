@@ -35,7 +35,6 @@ public class CypherResultRepresentation extends MappingRepresentation
 {
     private final ListRepresentation resultRepresentation;
     private final ListRepresentation columns;
-    private final boolean includePlan;
     private final MappingRepresentation plan;
 
 
@@ -44,8 +43,16 @@ public class CypherResultRepresentation extends MappingRepresentation
         super( RepresentationType.STRING );
         resultRepresentation = createResultRepresentation(result);
         columns = ListRepresentation.string( result.columns() );
-        this.includePlan = includePlan;
         plan = includePlan ? createPlanRepresentation( result.executionPlanDescription() ) : null;
+    }
+
+    @Override
+    protected void serialize( MappingSerializer serializer )
+    {
+        serializer.putList( "columns", columns );
+        serializer.putList( "data", resultRepresentation );
+        if (plan != null)
+            serializer.putMapping( "plan", plan );
     }
 
     private MappingRepresentation createPlanRepresentation( final PlanDescription planDescription )
@@ -55,31 +62,21 @@ public class CypherResultRepresentation extends MappingRepresentation
             protected void serialize( MappingSerializer mappingSerializer )
             {
                 mappingSerializer.putString( "name", planDescription.getName() );
-                // TODO args
-                // TODO stats
+                
                 mappingSerializer.putList( "children",
-                    new ListRepresentation( "children",
-                            new IterableWrapper<Representation, PlanDescription>(planDescription.getChildren()) {
+                        new ListRepresentation( "children",
+                                new IterableWrapper<Representation, PlanDescription>(planDescription.getChildren()) {
 
-                                @Override
-                                protected Representation underlyingObjectToObject( PlanDescription object )
-                                {
-                                    return createPlanRepresentation( object );
+                                    @Override
+                                    protected Representation underlyingObjectToObject( PlanDescription object )
+                                    {
+                                        return createPlanRepresentation( object );
+                                    }
                                 }
-                            }
-                    )
+                        )
                 );
             }
         };
-    }
-
-    @Override
-    protected void serialize( MappingSerializer serializer )
-    {
-        serializer.putList( "columns", columns );
-        serializer.putList( "data", resultRepresentation );
-        if (includePlan)
-            serializer.putMapping( "plan", plan );
     }
 
     private ListRepresentation createResultRepresentation(ExecutionResult executionResult) {
@@ -101,7 +98,7 @@ public class CypherResultRepresentation extends MappingRepresentation
         });
     }
 
-    Representation getRepresentation( Object r )
+    private Representation getRepresentation( Object r )
     {
         if( r == null )
         {
@@ -132,7 +129,7 @@ public class CypherResultRepresentation extends MappingRepresentation
         return representationDispatcher.dispatch( r, "" );
     }
 
-    Representation handleIterable( Iterable data ) {
+    private Representation handleIterable( Iterable data ) {
         final List<Representation> results = new ArrayList<Representation>();
         for ( final Object value : data )
         {
@@ -144,7 +141,7 @@ public class CypherResultRepresentation extends MappingRepresentation
         return new ListRepresentation( representationType, results );
     }
 
-    RepresentationType getType( List<Representation> representations )
+    private RepresentationType getType( List<Representation> representations )
     {
         if ( representations == null || representations.isEmpty() )
             return RepresentationType.STRING;
