@@ -106,15 +106,7 @@ class PlanDescriptionTest extends Assertions {
     assert("linus" === result.cd("linus").getName)
     assert("pauline" === result.cd("pauline").getName)
     assert("fritz" === result.cd("pauline", "fritz").getName)
-    assert(true === result.isRoot)
-    assert(result === result.getRoot)
-    assert(false === result.cd("linus").isRoot)
-    assert(result === result.cd("linus").getRoot)
-    assert(false === result.cd("pauline").isRoot)
-    assert(result === result.cd("pauline").getRoot)
     assert("fritz" == result.getChild("pauline").getChild("fritz").getName)
-    assert(false === result.cd("pauline", "fritz").isRoot)
-    assert(result === result.cd("pauline", "fritz").getRoot)
   }
 
   @Test

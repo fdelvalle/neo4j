@@ -37,7 +37,6 @@ class ProfilerAcceptanceTest extends ExecutionEngineHelper with Assertions {
     //GIVEN
     createNode("foo" -> "bar")
     val result: ExecutionResult = engine.profile("START n=node(1) RETURN n")
-    result.materialize()
 
     //WHEN THEN
     assertRows(1)(result)("ColumnFilter")
@@ -71,8 +70,8 @@ class ProfilerAcceptanceTest extends ExecutionEngineHelper with Assertions {
   }
 
   private def parentCd(result: ExecutionResult, names: Seq[String]) = {
-    result.materialize()
-    val descr = result.executionPlanDescription()
+    result.toList
+    val descr = result.executionPlanDescription().asJava
     if (names.isEmpty)
       descr
     else {

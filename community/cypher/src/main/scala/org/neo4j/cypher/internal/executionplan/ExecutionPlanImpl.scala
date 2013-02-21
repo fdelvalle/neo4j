@@ -144,7 +144,7 @@ class ExecutionPlanImpl(inputQuery: Query, graph: GraphDatabaseService) extends 
     func
   }
 
-  private def prepareStateAndResult(params: Map[String, Any], pipe: Pipe, profile: Boolean): (QueryState, Iterator[ExecutionContext], () => JPlanDescription) = {
+  private def prepareStateAndResult(params: Map[String, Any], pipe: Pipe, profile: Boolean): (QueryState, Iterator[ExecutionContext], () => PlanDescription) = {
     val tx = graph.beginTx()
 
     val decorator: PipeDecorator = if (profile)
@@ -160,7 +160,7 @@ class ExecutionPlanImpl(inputQuery: Query, graph: GraphDatabaseService) extends 
 
       val closingIterator = new ClosingIterator[ExecutionContext](results, state.query, tx)
 
-      (state, closingIterator, () => decorator.decorate(pipe.executionPlanDescription).asJava)
+      (state, closingIterator, () => decorator.decorate(pipe.executionPlanDescription))
     } catch {
       case e: Throwable =>
         tx.failure()

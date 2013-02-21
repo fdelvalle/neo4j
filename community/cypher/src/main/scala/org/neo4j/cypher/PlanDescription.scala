@@ -97,24 +97,17 @@ class PlanDescription(val pipe: Pipe,
     }
   }
 
-  lazy val asJava: JPlanDescription = asJava(None)
 
-  protected def asJava(parent: Option[JPlanDescription]): JPlanDescription = new PlanDescriptionConverter(parent)
+  lazy val asJava: JPlanDescription = new PlanDescriptionConverter
 
   /**
    * Java-side PlanDescription implementation
    */
-  private class PlanDescriptionConverter(parent: Option[JPlanDescription]) extends JPlanDescription {
+  private class PlanDescriptionConverter extends JPlanDescription {
 
-    val _children: util.List[JPlanDescription] = children.map(_.asJava(Some(this))).toList.asJava
+    val _children: util.List[JPlanDescription] = children.map(_.asJava).toList.asJava
 
     val _args: util.Map[String, Object] = argsMap.asJava.asInstanceOf[java.util.Map[String, Object]]
-
-    def isRoot = parent.isEmpty
-
-    override lazy val getRoot = if (isRoot) this else getParent.getRoot
-
-    def getParent = parent.getOrElse(throw new NoSuchElementException("Root does not have a parent"))
 
     def cd(names: String*) = {
       var planDescription: JPlanDescription = this

@@ -30,22 +30,6 @@ public interface PlanDescription
     public Map<String, Object> getArguments();
 
     /**
-     * @return true if this is a topmost execution step
-     */
-    public boolean isRoot();
-
-    /**
-     * @return topmost PlanDescription below which the associated execution step is taking place
-     */
-    public PlanDescription getRoot();
-
-    /**
-     * @return PlanDescription of which this PlanDescription is a child
-     * @throws java.util.NoSuchElementException if this PlanDescription is a root
-     */
-    public PlanDescription getParent() throws NoSuchElementException;
-
-    /**
      * Starting from this PlanDescription, retrieve children by successive calls to getChild() and
      * return the final PlanDescription thus found
      *
