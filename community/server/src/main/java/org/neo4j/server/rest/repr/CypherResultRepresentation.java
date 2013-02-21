@@ -19,12 +19,15 @@
  */
 package org.neo4j.server.rest.repr;
 
+import static org.neo4j.server.rest.repr.ObjectToRepresentationConverter.getMapRepresentation;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.cypher.javacompat.PlanDescription;
+import org.neo4j.cypher.javacompat.ProfilerStatistics;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -41,7 +44,7 @@ public class CypherResultRepresentation extends MappingRepresentation
     public CypherResultRepresentation( ExecutionResult result, boolean includePlan )
     {
         super( RepresentationType.STRING );
-        resultRepresentation = createResultRepresentation(result);
+        resultRepresentation = createResultRepresentation( result );
         columns = ListRepresentation.string( result.columns() );
         plan = includePlan ? createPlanRepresentation( result.executionPlanDescription() ) : null;
     }
@@ -62,7 +65,16 @@ public class CypherResultRepresentation extends MappingRepresentation
             protected void serialize( MappingSerializer mappingSerializer )
             {
                 mappingSerializer.putString( "name", planDescription.getName() );
-                
+                MappingRepresentation argsRepresentation = getMapRepresentation( (Map) planDescription.getArguments() );
+                mappingSerializer.putMapping( "args", argsRepresentation );
+
+                if ( planDescription.hasProfilerStatistics() )
+                {
+                    ProfilerStatistics stats = planDescription.getProfilerStatistics();
+                    mappingSerializer.putNumber( "rows", stats.getRows() );
+                    mappingSerializer.putNumber( "dbHits", stats.getDbHits() );
+                }
+
                 mappingSerializer.putList( "children",
                         new ListRepresentation( "children",
                                 new IterableWrapper<Representation, PlanDescription>(planDescription.getChildren()) {
