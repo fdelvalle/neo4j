@@ -1,3 +1,7 @@
+1.8.3
+-----
+o Fixes #450 - Predicates in WHERE are not evaluated correctly for certain patterns
+
 1.8.2
 -----
 o Clearer error message for when aggregations are used in ORDER BY and not in RETURN

@@ -769,14 +769,14 @@ class ExecutionEngineTest extends ExecutionEngineHelper {
   @Test def aVarLengthPathOfLengthZero() {
     val a = createNode()
     val b = createNode()
-    relate(a,b)
+    relate(a, b)
 
     val result = parseAndExecute("start a=node(1) match p=a-[*0..1]->b return a,b, length(p) as l")
 
     assertEquals(
       Set(
-        Map("a" -> a, "b" -> a, "l"->0),
-        Map("a" -> a, "b" -> b, "l"->1)),
+        Map("a" -> a, "b" -> a, "l" -> 0),
+        Map("a" -> a, "b" -> b, "l" -> 1)),
       result.toSet)
   }
 
@@ -1901,27 +1901,27 @@ RETURN x0.name?
   @Test def square_function_returns_decimals() {
     val result = parseAndExecute("start n=node(0) return sqrt(12.96)").toList
 
-    assert(result === List(Map("sqrt(12.96)"->3.6)))
+    assert(result === List(Map("sqrt(12.96)" -> 3.6)))
   }
 
   @Test def maths_inside_aggregation() {
-    val andres = createNode("name"->"Andres")
-    val michael = createNode("name"->"Michael")
-    val peter = createNode("name"->"Peter")
-    val bread = createNode("type"->"Bread")
-    val veg = createNode("type"->"Veggies")
-    val meat = createNode("type"->"Meat")
+    val andres = createNode("name" -> "Andres")
+    val michael = createNode("name" -> "Michael")
+    val peter = createNode("name" -> "Peter")
+    val bread = createNode("type" -> "Bread")
+    val veg = createNode("type" -> "Veggies")
+    val meat = createNode("type" -> "Meat")
 
-    relate(andres, bread, "ATE", Map("times"->10))
-    relate(andres, veg, "ATE", Map("times"->8))
+    relate(andres, bread, "ATE", Map("times" -> 10))
+    relate(andres, veg, "ATE", Map("times" -> 8))
 
-    relate(michael, veg, "ATE", Map("times"->4))
-    relate(michael, bread, "ATE", Map("times"->6))
-    relate(michael, meat, "ATE", Map("times"->9))
+    relate(michael, veg, "ATE", Map("times" -> 4))
+    relate(michael, bread, "ATE", Map("times" -> 6))
+    relate(michael, meat, "ATE", Map("times" -> 9))
 
-    relate(peter, veg, "ATE", Map("times"->7))
-    relate(peter, bread, "ATE", Map("times"->7))
-    relate(peter, meat, "ATE", Map("times"->4))
+    relate(peter, veg, "ATE", Map("times" -> 7))
+    relate(peter, bread, "ATE", Map("times" -> 7))
+    relate(peter, meat, "ATE", Map("times" -> 4))
 
     val result = parseAndExecute(
       """    start me=node(1)
@@ -1975,7 +1975,7 @@ RETURN x0.name?
 
   @Test
   def array_prop_output() {
-    createNode("foo"->Array(1,2,3))
+    createNode("foo" -> Array(1, 2, 3))
     val result = parseAndExecute("start n=node(1) return n").dumpToString()
     assertThat(result, containsString("[1,2,3]"))
   }
@@ -1998,7 +1998,7 @@ RETURN x0.name?
   def optional_expression() {
     val a = createNode()
     val b = createNode()
-    val r = relate(a,b)
+    val r = relate(a, b)
 
     val result = parseAndExecute("START a=node(1) match a-->b RETURN a-[?]->b").toList
     assert(result === List(Map("a-[?]->b" -> List(PathImpl(a, r, b)))))
@@ -2009,8 +2009,8 @@ RETURN x0.name?
     val a = createNode()
     val b = createNode()
     val c = createNode()
-    relate(a,b)
-    relate(a,c)
+    relate(a, b)
+    relate(a, c)
 
     val result = parseAndExecute("START a=node(1) foreach(n in extract(p in a-->() : last(p)) : set n.touched = true) return a-->()").dumpToString()
     println(result)
@@ -2022,7 +2022,7 @@ RETURN x0.name?
     createNode()
 
     val result = parseAndExecute("START a=node(1),b=node(2) MATCH a-[r1?]->X<-[r2?]-b return X").toList
-    assert(result === List(Map("X"->null)))
+    assert(result === List(Map("X" -> null)))
   }
 
   @Test
@@ -2212,7 +2212,7 @@ RETURN x0.name?
       head("tail(tail(n.array))").
       asInstanceOf[mutable.WrappedArray[_]]
 
-    assert(result.toList === List(3,4,5))
+    assert(result.toList === List(3, 4, 5))
   }
 
   @Test
@@ -2224,7 +2224,7 @@ RETURN x0.name?
 
   @Test
   def params_should_survive_with() {
-    val result = parseAndExecute("START n=node(0) WITH collect(n) as coll where length(coll)={id} RETURN coll", "id"->1)
+    val result = parseAndExecute("START n=node(0) WITH collect(n) as coll where length(coll)={id} RETURN coll", "id" -> 1)
 
     assert(result.toList === List(Map("coll" -> List(refNode))))
   }
@@ -2246,11 +2246,11 @@ RETURN x0.name?
   @Test
   def nodes_named_r_should_not_pose_a_problem() {
     val a = createNode()
-    val r = createNode("foo"->"bar")
+    val r = createNode("foo" -> "bar")
     val b = createNode()
 
-    relate(a,r)
-    relate(r,b)
+    relate(a, r)
+    relate(r, b)
 
     val result = parseAndExecute("START a=node(1) MATCH a-->r-->b WHERE r.foo = 'bar' RETURN b")
 
@@ -2260,11 +2260,11 @@ RETURN x0.name?
   @Test
   def can_rewrite_has_property() {
     val a = createNode()
-    val r = createNode("foo"->"bar")
+    val r = createNode("foo" -> "bar")
     val b = createNode()
 
-    relate(a,r)
-    relate(r,b)
+    relate(a, r)
+    relate(r, b)
 
     val result = parseAndExecute("START a=node(1) MATCH a-->r-->b WHERE has(r.foo) RETURN b")
 
@@ -2283,7 +2283,7 @@ RETURN x0.name?
     val a = createNode()
     val result = parseAndExecute("start n=node(1) return sum(ID(n)), n as m")
 
-    assert(result.toList === List(Map("sum(ID(n))"->1, "m"->a)))
+    assert(result.toList === List(Map("sum(ID(n))" -> 1, "m" -> a)))
   }
 
   def can_handle_paths_with_multiple_unnamed_nodes() {
@@ -2314,6 +2314,37 @@ RETURN x0.name?
     relate(refNode, createNode("name" -> "Neo"))
     val result = parseAndExecute("START n = node(0) MATCH n-->me WHERE me.name IN ['Neo'] RETURN me.name")
 
-    assert(result.toList === List(Map("me.name"->"Neo")))
+    assert(result.toList === List(Map("me.name" -> "Neo")))
+  }
+
+  @Test
+  def should_use_predicates_in_the_correct_place() {
+    //GIVEN
+    val m = parseAndExecute( """create
+                        advertiser = {name:"advertiser1"},
+                        thing      = {name:"Color"},
+                        red        = {name:"red"},
+                        p1         = {name:"product1"},
+                        p2         = {name:"product4"},
+                        (advertiser)-[:adv_has_product]->(p1),
+                        (advertiser)-[:adv_has_product]->(p2),
+                        (thing)-[:aa_has_value]->(red),
+                        (p1)   -[:ap_has_value]->(red),
+                        (p2)   -[:ap_has_value]->(red)
+                        return advertiser, thing""").toList.head
+
+    val advertiser = m("advertiser").asInstanceOf[Node]
+    val thing = m("thing").asInstanceOf[Node]
+
+
+    //WHEN
+    val result = parseAndExecute(
+      """START advertiser = node({1}), a = node({2})
+       MATCH (advertiser) -[:adv_has_product] ->(out) -[:ap_has_value] -> red <-[:aa_has_value]- (a)
+       WHERE red.name = 'red' and out.name = 'product1'
+       RETURN out.name""", "1" -> advertiser, "2" -> thing)
+
+    //THEN
+    assert(result.toList === List(Map("out.name" -> "product1")))
   }
 }

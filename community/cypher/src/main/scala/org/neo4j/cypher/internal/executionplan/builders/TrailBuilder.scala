@@ -19,16 +19,16 @@
  */
 package org.neo4j.cypher.internal.executionplan.builders
 
-import org.neo4j.cypher.internal.commands.{VarLengthRelatedTo, RelatedTo, Pattern, Predicate}
+import org.neo4j.cypher.internal.commands._
 import org.neo4j.graphdb.Direction
-import org.neo4j.cypher.internal.commands.expressions.Identifier
+import org.neo4j.cypher.internal.commands.expressions.{Expression, Identifier}
 import org.neo4j.cypher.internal.pipes.matching._
 import org.neo4j.helpers.ThisShouldNotHappenError
-import annotation.tailrec
 import org.neo4j.cypher.internal.pipes.matching.VariableLengthStepTrail
 import org.neo4j.cypher.internal.pipes.matching.EndPoint
+import org.neo4j.cypher.internal.pipes.matching.RelationshipIdentifier
 import org.neo4j.cypher.internal.pipes.matching.SingleStepTrail
-import org.neo4j.cypher.internal.commands.expressions.Property
+import annotation.tailrec
 
 object TrailBuilder {
   def findLongestTrail(patterns: Seq[Pattern], boundPoints: Seq[String], predicates: Seq[Predicate] = Seq.empty) =
@@ -50,24 +50,35 @@ final class TrailBuilder(patterns: Seq[Pattern], boundPoints: Seq[String], predi
 
     def transformToTrail(p: Pattern, done: Trail, patternsToDo: Seq[Pattern]): (Trail, Seq[Pattern]) = {
 
-      def nodePredicateRewriter(originalName: String)(pred: Predicate) = pred.rewrite {
-        case Identifier(name) if name == originalName     => NodeIdentifier(name)
-        case Property(name, prop) if name == originalName => MiniMapNodeProperty(name, prop)
-        case e                                            => e
+      def rewriteTo(originalName: String, newExpr: Expression)(e: Expression) = e match {
+        case Identifier(name) if name == originalName => newExpr
+        case _                                        => e
       }
 
-      def relPredicateRewriter(originalName: String)(pred: Predicate) = pred.rewrite {
-        case Identifier(name) if name == originalName     => RelationshipIdentifier(name)
-        case Property(name, prop) if name == originalName => MiniMapRelProperty(name, prop)
-        case e                                            => e
+      def findPredicates(k: String): Seq[Predicate] = predicates.filter(createFinder(k))
+
+      def option(p: Predicate): Option[Predicate] = p match {
+        case True() => None
+        case _      => Some(p)
       }
 
-      def relPred(k: String) = predicates.find(createFinder(k)).map(relPredicateRewriter(k))
-      def nodePred(k: String) = predicates.find(createFinder(k)).map(nodePredicateRewriter(k))
       def singleStep(rel: RelatedTo, end: String, dir: Direction) = {
-        done.add(start => SingleStepTrail(EndPoint(end), dir, rel.relName, rel.relTypes, start, relPred(rel.relName), nodePred(end), rel))
+        val orgRelPred: Seq[Predicate] = findPredicates(rel.relName)
+        val orgNodePred: Seq[Predicate] = findPredicates(end)
+
+        val relPred: Predicate = Predicate.
+          fromSeq(orgRelPred).
+          rewrite(rewriteTo(rel.relName, RelationshipIdentifier(rel.relName)))
+
+        val nodePred: Predicate = Predicate.
+          fromSeq(orgNodePred).
+          rewrite(rewriteTo(end, NodeIdentifier(end)))
+
+        done.add(start => SingleStepTrail(EndPoint(end), dir, rel.relName, rel.relTypes, start, option(relPred), option(nodePred), rel))
       }
-      def multiStep(rel: VarLengthRelatedTo, end: String, dir: Direction) = done.add(start => VariableLengthStepTrail(EndPoint(end), dir, rel.relTypes, rel.minHops.getOrElse(1), rel.maxHops, rel.pathName, rel.relIterator, start, rel))
+
+      def multiStep(rel: VarLengthRelatedTo, end: String, dir: Direction) =
+        done.add(start => VariableLengthStepTrail(EndPoint(end), dir, rel.relTypes, rel.minHops.getOrElse(1), rel.maxHops, rel.pathName, rel.relIterator, start, rel))
 
       val patternsLeft = patternsToDo.filterNot(_ == p)
 

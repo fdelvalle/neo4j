@@ -21,8 +21,8 @@ package org.neo4j.cypher.internal.pipes.matching
 
 import org.neo4j.graphdb.{Node, Relationship, Direction, RelationshipType}
 import org.neo4j.cypher.internal.commands.{And, Predicate}
-import collection.JavaConverters._
 import org.neo4j.cypher.internal.pipes.ExecutionContext
+import collection.JavaConverters._
 
 case class SingleStep(id: Int,
                       typ: Seq[RelationshipType],
@@ -65,7 +65,7 @@ case class SingleStep(id: Int,
         ">"
 
     val relInfo = typ.toList match {
-      case List() => ""
+      case List() => "[{%s,%s}]".format(relPredicate, nodePredicate)
       case _      => "[:%s {%s,%s}]".format(typ.map(_.name()).mkString("|"), relPredicate, nodePredicate)
     }
 
