@@ -234,11 +234,9 @@ The Neo4j Team""")
     throw new SyntaxException(errorMessage)
   }
 
-  lazy val entityFactory = new EntityProducerFactory(graph)
-
   lazy val builders = Seq(
     new NodeByIdBuilder(graph),
-    new IndexQueryBuilder(entityFactory),
+    new IndexQueryBuilder,
     new GraphGlobalStartBuilder(graph),
     new FilterBuilder,
     new NamedPathBuilder,
