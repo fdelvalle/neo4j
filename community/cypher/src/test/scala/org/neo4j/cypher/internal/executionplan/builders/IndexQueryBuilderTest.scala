@@ -106,7 +106,7 @@ class IndexQueryBuilderTest extends BuilderTest with MockitoSugar {
     //GIVEN
     val q = PartiallySolvedQuery().copy(
       where = Seq(Unsolved(Equals(Property(Identifier("n"), propertyKey), Literal("Stefan")))),
-      start = Seq(Unsolved(IndexHint("n", labelName, propertyKey))))
+      start = Seq(Unsolved(IndexHint("n", labelName, propertyKey, Some(Literal("a"))))))
 
     when(context.getIndexRuleId(labelName, propertyKey)).thenReturn(Some(1L))
 
@@ -121,7 +121,7 @@ class IndexQueryBuilderTest extends BuilderTest with MockitoSugar {
     //GIVEN
     val q = PartiallySolvedQuery().copy(
       where = Seq(Unsolved(Equals(Property(Identifier("n"), "name"), Literal("Stefan")))),
-      start = Seq(Unsolved(IndexHint("n", "Person", "name"))))
+      start = Seq(Unsolved(IndexHint("n", "Person", "name", None))))
 
     when(context.getIndexRuleId(any(), any())).thenReturn(None)
 
