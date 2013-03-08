@@ -59,18 +59,18 @@ class EntityProducerFactory(planContext: PlanContext) {
 
   val nodeByIndexHint: PartialFunction[StartItem, EntityProducer[Node]] = {
     case IndexHint(identifier, labelName, propertyName, valueExp) =>
-      val indexId = planContext.getIndexRuleId(labelName, propertyName)
-      indexId.getOrElse(throw new IndexHintException(identifier, labelName, propertyName, "No such index found."))
-      val expression = valueExp.getOrElse(throw new InternalException("Something went wrong trying to build your query."))
+      val indexIdGetter = planContext.getIndexRuleId(labelName, propertyName)
 
-      //      TODO we need to find the matching expression in varName.propertyName predicates
+      val indexId = indexIdGetter getOrElse
+        (throw new IndexHintException(identifier, labelName, propertyName, "No such index found."))
+
+      val expression = valueExp getOrElse
+        (throw new InternalException("Something went wrong trying to build your query."))
 
       (m: ExecutionContext, state: QueryState) => {
         val value = expression(m)(state)
-        Iterator.empty
-//        state.query.ind
+        state.query.exactIndexSearch(indexId, value)
       }
-
   }
 
   val relationshipByIndex: PartialFunction[StartItem, EntityProducer[Relationship]] = {

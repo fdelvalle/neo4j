@@ -19,23 +19,26 @@
  */
 package org.neo4j.cypher.internal.executionplan.builders
 
-import org.neo4j.cypher.internal.spi.PlanContext
+import org.neo4j.cypher.internal.spi.{QueryContext, PlanContext}
 import org.scalatest.mock.MockitoSugar
 import org.junit.{Before, Test}
 import org.mockito.Mockito._
 import org.neo4j.cypher.internal.commands.IndexHint
 import org.neo4j.cypher.IndexHintException
 import org.scalatest.Assertions
+import org.neo4j.graphdb.Node
+import org.neo4j.cypher.internal.commands.expressions.Literal
+import org.neo4j.cypher.internal.pipes.QueryState
 
 
 class EntityProducerFactoryTest extends MockitoSugar with Assertions {
-  var context: PlanContext = null
+  var planContext: PlanContext = null
   var factory: EntityProducerFactory = null
 
   @Before
   def init() {
-    context = mock[PlanContext]
-    factory = new EntityProducerFactory(context)
+    planContext = mock[PlanContext]
+    factory = new EntityProducerFactory(planContext)
   }
 
   @Test
@@ -43,9 +46,27 @@ class EntityProducerFactoryTest extends MockitoSugar with Assertions {
     //GIVEN
     val label: String = "label"
     val prop: String = "prop"
-    when(context.getIndexRuleId(label, prop)).thenReturn(None)
+    when(planContext.getIndexRuleId(label, prop)).thenReturn(None)
 
     //WHEN
     intercept[IndexHintException](factory.nodeByIndexHint(IndexHint("id", label, prop, None)))
+  }
+
+  @Test
+  def calls_the_right_methods() {
+    //GIVEN
+    val label: String = "label"
+    val prop: String = "prop"
+    val indexId: Long = 1L
+    val value = 42
+    val queryContext: QueryContext = mock[QueryContext]
+    when(planContext.getIndexRuleId(label, prop)).thenReturn(Some(indexId))
+    val indexResult = Iterator(null)
+    when(queryContext.exactIndexSearch(indexId, value)).thenReturn(indexResult)
+    val state = QueryState().copy(inner = queryContext)
+
+    //WHEN
+    val func = factory.nodeByIndexHint(IndexHint("id", label, prop, Some(Literal(value))))
+    assert(func(null, state) === indexResult)
   }
 }
